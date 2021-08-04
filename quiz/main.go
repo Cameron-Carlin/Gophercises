@@ -6,11 +6,15 @@ import (
 	"fmt"
 	"os"
 	"strings"
+	"time"
 )
 
 func main() {
+
 	//This flag is if you use the -h or --help, not exactly needed for this, but good to know if you're using pure binary files etc.
+
 	csvFilename := flag.String("csv", "problems.csv", "a csv file in the format of 'question, answer'")
+	timeLimit := flag.Int("limit", 30, "the time limit for the quiz in seconds")
 	flag.Parse()
 
 	file, err := os.Open(*csvFilename)
@@ -32,24 +36,32 @@ func main() {
 
 	problems := parseLines(lines)
 
-	//fmt.Println(problems) - Just to see the 2d slice is now a slice with object type problems
+	timer := time.NewTimer(time.Duration(*timeLimit) * time.Second)
+
 	correct := 0
 
 	//this will print every problem, without giving the answers. Also proceeds them with Problem #d, spicy stuff.
 
 	for i, p := range problems {
-		fmt.Printf("Problem #%d: %s = \n", i+1, p.q)
-		var answer string
+		select {
+		case <-timer.C:
+			fmt.Printf("Time limit reached. You got %d correct out of %d.\n", correct, len(problems))
+			return
+		default:
+			fmt.Printf("Problem #%d: %s = \n", i+1, p.q)
+			var answer string
 
-		//this gets rid of all spaces, works for numerical and single word quizzes, not for ones that require multi-line answers. We've also given a pointer to the answer variable so that it knows what to expect.
+			//this gets rid of all spaces, works for numerical and single word quizzes, not for ones that require multi-line answers. We've also given a pointer to the answer variable so that it knows what to expect.
 
-		fmt.Scanf("%s\n", &answer)
+			fmt.Scanf("%s\n", &answer)
 
-		if answer == p.a {
-			correct++
-		} else {
-			fmt.Printf("WRONG! The correct answer is %s.\n", p.a)
+			if answer == p.a {
+				correct++
+			} else {
+				fmt.Printf("WRONG! The correct answer is %s.\n", p.a)
+			}
 		}
+
 	}
 	fmt.Printf("You got %d correct out of %d.\n", correct, len(problems))
 }
@@ -63,6 +75,9 @@ func parseLines(lines [][]string) []problem {
 	for i, line := range lines {
 		ret[i] = problem{
 			q: line[0],
+
+			//dirty fix to trimspace and help validate the CSV.
+
 			a: strings.TrimSpace(line[1]),
 		}
 	}
