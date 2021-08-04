@@ -26,7 +26,7 @@ func main() {
 	//we can print the lines, our quiz goes from a 2d slice to just slices structured with our values.
 	problems := parseLines(lines)
 	//fmt.Println(problems) - Just to see the 2d slice is now a slice with object type problems
-
+	correct := 0
 	//this will print every problem, without giving the answers. Also proceeds them with Problem #d, spicy stuff
 	for i, p := range problems {
 		fmt.Printf("Problem #%d: %s = \n", i+1, p.q)
@@ -35,9 +35,12 @@ func main() {
 		fmt.Scanf("%s\n", &answer)
 
 		if answer == p.a {
-			fmt.Println("Correct")
+			correct++
+		} else {
+			fmt.Printf("WRONG! The correct answer is %s.\n", p.a)
 		}
 	}
+	fmt.Printf("You got %d correct out of %d.\n", correct, len(problems))
 }
 
 //this function will read in our CSV and highlight problems up to the CSV length
