@@ -43,18 +43,26 @@ func main() {
 	//this will print every problem, without giving the answers. Also proceeds them with Problem #d, spicy stuff.
 
 	for i, p := range problems {
-		select {
-		case <-timer.C:
-			fmt.Printf("Time limit reached. You got %d correct out of %d.\n", correct, len(problems))
-			return
-		default:
-			fmt.Printf("Problem #%d: %s = \n", i+1, p.q)
+		fmt.Printf("Problem #%d: %s = \n", i+1, p.q)
+		//answer channel that can read strings. Will be used for scanning.
+		answerCh := make(chan string)
+		//A go function that scans for an answer.
+		go func() {
+
 			var answer string
 
 			//this gets rid of all spaces, works for numerical and single word quizzes, not for ones that require multi-line answers. We've also given a pointer to the answer variable so that it knows what to expect.
 
 			fmt.Scanf("%s\n", &answer)
+			// arrow points towards where the data is moving.
+			answerCh <- answer
+		}()
 
+		select {
+		case <-timer.C:
+			fmt.Printf("\nTime limit reached. You got %d out of %d correct.\n", correct, len(problems))
+			return
+		case answer := <-answerCh:
 			if answer == p.a {
 				correct++
 			} else {
