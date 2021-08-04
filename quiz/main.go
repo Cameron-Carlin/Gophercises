@@ -23,7 +23,21 @@ func main() {
 	if err != nil {
 		exit("Failed to parse provided CSV file.")
 	}
-	fmt.Println(lines)
+	//we can print the lines, our quiz goes from a 2d slice to just slices structured with our values.
+	problems := parseLines(lines)
+	//fmt.Println(problems) - Just to see the 2d slice is now a slice with object type problems
+
+	//this will print every problem, without giving the answers. Also proceeds them with Problem #d, spicy stuff
+	for i, p := range problems {
+		fmt.Printf("Problem #%d: %s = \n", i+1, p.q)
+		var answer string
+		//this gets rid of all spaces, works for numerical and single word quizzes, not for ones that require multi-line answers. We've also given a pointer to the answer variable so that it knows what to expect.
+		fmt.Scanf("%s\n", &answer)
+
+		if answer == p.a {
+			fmt.Println("Correct")
+		}
+	}
 }
 
 //this function will read in our CSV and highlight problems up to the CSV length
